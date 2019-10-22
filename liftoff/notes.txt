@@ -1,0 +1,36 @@
+--learning Haskell Notes
+
+Monday Morning Haskell lecture 1
+--everything in Haskell is an expression
+-- to get the type of an element use :t
+
+Types are used to determing expression compatability through function composition
+
+partial application is a allowed, have to used brackets to show that it is a function.
+
+>>let f = (5 +)
+>>f 4
+9
+
+- lists in haskell all have to be the same type
+- a string is just a list of Characters
+
+Tuples are used to combine elements of different type
+ we can combine multiple data types into the tuple
+ also, we can make lists of tuples provided that they are all of the same type!
+
+Finished Lecture 1.
+https://mmhaskell.com/liftoff-2
+
+11/6/19
+- up to section 2 if else statements.
+
+If and Else statements
+- return values have to be of the same type
+
+- there is no elif like python, however you can use nested if statements.
+
+If Statements can be rewritted with GUARDS
+
+
+--up to patter matching, I have written the function but not worked through the example.
