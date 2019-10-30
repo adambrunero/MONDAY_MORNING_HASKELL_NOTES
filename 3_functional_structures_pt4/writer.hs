@@ -89,5 +89,6 @@ wfunc4 input = if (length input) < 10
 
 -- the above didn't woork
 --created a new type Total that was a Sum Int
---http://learnyouahaskell.com/for-a-few-monads-more
 -- so that int could be incremented as part of the sum newtype
+--used this a tutorial, review for an exercise
+--http://learnyouahaskell.com/for-a-few-monads-more

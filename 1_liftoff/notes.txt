@@ -4,7 +4,7 @@ Monday Morning Haskell lecture 1
 --everything in Haskell is an expression
 -- to get the type of an element use :t
 
-Types are used to determing expression compatability through function composition
+Types are used to determine expression compatibility through function composition
 
 partial application is a allowed, have to used brackets to show that it is a function.
 
@@ -33,4 +33,4 @@ If and Else statements
 If Statements can be rewritted with GUARDS
 
 
---up to patter matching, I have written the function but not worked through the example.
+--up to pattern matching, I have written the function but not worked through the example.

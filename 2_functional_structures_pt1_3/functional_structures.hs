@@ -71,9 +71,9 @@ data GovDirectory a  = GovDirectory {
     councilMembers :: [a]}
     deriving (Show)
 
--- we can define the following functor instanace for GovDirectory by definging fmap
+-- we can define the following functor instance for GovDirectory by definging fmap
 --need to review what the instance keyword does?
-    -- is this just an instance of representation of a dataype?
+    -- is this just an instance of representation of a datatype?
 
 instance Functor GovDirectory where
     fmap f oldDirectory = GovDirectory {
@@ -147,12 +147,12 @@ funcMaybe (Just f) val = f <$> val
 -- a monad is defined in a type class, it has two fuctions
 -- class Monad m where
 --   return :: a -> m a
---   (>>=) :: m a -> a -> m b -> m b
+--   (>>=) :: m a -> (a -> m b) -> m b
 
 -- the return function specifies how to wrap values in the Monad's context
 --      a -> m a
 -- the >>= operator (called bind), specifies how to combine two operations within the context
-
+--https://www.haskell.org/tutorial/monads.html
 --The Maybe Monad
 maybeFunc1 :: String -> Maybe Int
 maybeFunc1 "" = Nothing
