@@ -1,0 +1,213 @@
+MONAD LAWS
+- final Sections on MONADS
+
+- The notion of structural laws is important as it enables:
+  - other programmers to reason about our code with certainty
+  - compability through typeclasses
+
+Each of the structures that we have learnt in this series has their own set of laws
+
+LIFE WITHOUT LAWS
+
+- each abstract class is represented by a type class
+    - even though we may implement one or two functions in the code and it type checks it may not be mathematically correct.
+    - your code may compile but the instances may not fufil other programmers expectations
+
+
+The previous example in functional_structures.hs about gov directory violates the functor laws.
+
+FUNCTOR LAWS
+There are two functor laws, the first is the identity law:
+
+1) fmap id = id
+as fmap maps a function over a container, if we map the identity function over a container we should just get that same container, there are no side effects.
+
+The second functor law is the composition law
+  - our functor composition should not break the composition of functions.
+2)  fmap (g . f) = fmap g . fmap f
+
+On one side we compose two functions and map the function over the container
+  - on the other side we map the first function and get the result and map the second function over it.
+
+The second functor law states that these outcomes should be identical
+
+-- the type of the composition operator is
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+--remember fmap has an infix synonym of <$>
+--example
+
+λ: g = (+) 1
+λ: f = (+) 2
+λ: x = [1, 2, 3, 4]
+--law 1
+λ: fmap id x
+[1,2,3,4]
+--law 2
+λ: (fmap g . fmap f) x
+[4,5,6,7]
+λ: fmap (g . f) x
+[4,5,6,7]
+
+
+APPLICATIVE LAWS
+Applicatives are used to apply functors in a context
+The applicative laws are more complicated, there are four:
+
+IDENTITY LAW
+1) pure id <*> v = v
+
+on the LHS we wrap the identity function, them we apply it over a container
+
+-- revised the laws, with this guide
+https://en.wikibooks.org/wiki/Haskell/Applicative_functors
+-- remember, pure has the type signature
+--pure :: Applicative f => a -> f a
+--example
+x = [1, 2, 3,4]
+λ: pure id <*> x
+[1,2,3,4]
+
+
+
+
+Beyond (<*>), the class has a second method, pure, which brings arbitrary values into the functor. As an example, let's have a look at the Maybe instance:
+
+instance Applicative Maybe where
+    pure                  = Just
+    (Just f) <*> (Just x) = Just (f x)
+    _        <*> _        = Nothing
+
+It doesn't do anything surprising: pure wraps the value with Just; (<*>) applies the function to the value if both exist, and results in Nothing otherwise.
+
+so
+λ: pure (4 *) <*> (Just 5)
+Just 20
+in this example the partial function 4* is wrapped in Just, and then applied if 5 from Just 5 if the values exist. Then returned with Just
+This same code is shown below with renaming f to be the same partial function.
+
+λ: f = (*) 4
+λ: pure (f) <*> (Just 5)
+Just 20
+
+
+-- remember that <*> is the sequtial application operator, it unwraps values for application of a functor within its context
+    <*> :: Applicative f => f (a -> b) -> f a -> f b
+--so in the above examples, we often have to wrap the value in pure so that it is ready to be unwrapped in the
+
+2) HOMOMORPHISM LAW
+Suppose we wrap a function and an object in pure. we can then apply the wrapped function over the wrapped object, of course we could also apply the normal function over the normal object and THEN wrap it in pure. The homomorphism law states that it should be the same.
+
+pure f <*> pure x = pure (f x)
+
+The theme of most of these laws is that our type classes are containers and that the typeclass function should not have any side effects
+  - all the functions should do is facilitate the wrapping, unwrapping and transformation of data.
+
+--examples
+λ: x = Just 5
+λ: f = (*) 5
+λ: pure f <*> x
+Just 25
+λ: pure f <*> pure 5
+25
+λ: pure (f 5)
+25
+
+3) INTERCHANGE LAW
+The order that we wrap things should not matter.
+On one side, we apply any applicative over a pure wrapped object.
+On the other side first we wrap a function applying the object as an argument.
+
+u <*> pure y  = pure ($ y) <*> u
+
+example
+--note ($ y) is the function that supplies y as an argument to another function
+
+λ: u = Just (+10)
+λ: u <*> pure 5
+Just 15
+λ: pure($ 5) <*> u
+Just 15
+This is the same as
+λ: pure (\f -> f 5) <*> Just (+10)
+Just 15
+
+5 is being applied as an argument to the function +10 inside the Just, it is using lambda notation which is equivalent to $
+
+-- note $ is the infix operator
+--https://stackoverflow.com/questions/19521246/what-does-mean-do-in-haskell
+--($) :: (a -> b) -> (a -> b)
+--f $ x = f x
+-- or
+--($) f x = f x
+-- or
+--($) = id
+--It's useful for avoiding extra parentheses: f (g x) == f $ g x
+
+4) Composition Law
+Function composition holds across applications within the functor
+
+pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
+
+pure composes morphisms similarly to how (.) composes functions:
+  - applying pure (.) <*> u <*> v to w gives the same result as
+  - applying u to the result of applying v to w.
+
+-- the type of the composition operator is
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+
+
+BONUS RELATIONSHIP
+
+fmap f x = pure f <*> x
+  - applying a "pure" function with <*> is equivalent to fmap
+
+-- example
+λ: f = (+) 5
+λ: x = [1, 2, 3, 4, 5]
+λ: fmap f x
+[6,7,8,9,10]
+λ: pure f <*> x
+[6,7,8,9,10]
+
+
+MONAD LAWS
+Monads have three laws, the first two are simple identity laws:
+
+return a >>= f = f
+m >>= return = m
+
+These are the right and left identities, they state that the only thing the return function is allowed to do is wrap the object.
+  - it cannot manipulate the data in any way
+
+The main take away is that the following code samples are equivalent
+
+func1 :: IO String
+func1 = do
+  str <- getLine
+  return str
+
+func2 :: IO String
+func2 = getLine
+
+The third law is a composition law:
+
+(m >>= f) >>= g = m >>= (\x -> f x >>= g)
+
+This third law has a parrallel structure to the other composition laws.
+In the first case we apply functions in two steps.
+In the second case, we compose the functions first then apply the result.
+
+
+Reviewing the LAWS.
+1. Identity should preserve over wrapper functions, like pure and return
+2. Function composition should hold across our structures 
+
+- review the haskell repl to do the functor checks
+
+https://repl.it/@badman/Haskell-Monad-Laws
+
+MONAD NOTES
+  - review fmap notes, do these need extra work?
+  - rewrite the notes on applicatives, they are a bit sparse
+  read this document in full
+  https://stackoverflow.com/q/uestions/27285918/applicatives-interchange-law

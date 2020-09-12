@@ -1,0 +1,121 @@
+Part 6 - Monad Transformers
+
+How can we used Monads Like Maybe when we are in another Monad like the IO Monad
+
+we can use Monad transformers to combine Monads
+
+a monad transformer is essentially a wrapper type, it is generally paramaeterised
+by another monad type. THe common transformers add T on the end of an existing monad
+
+here is the definition of maybeT
+
+newtype maybeT m a = maybeT { runMaybeT :: m (Maybe a)}
+
+instance (Monad m) => Monad (MaybeT m) where
+  return = lift . return
+  x >>= f = MaybeT $ do
+    v <- runMaybeT x
+      case v of
+        Nothing -> return Nothing
+        Just y -> runMaybeT (f y)
+
+so MaybeT is a newtype (it is a new type created with all the optimisations of an existing one, see mydata.hs)
+if the type of M is a monad, we can make a monad out of MaybeT
+
+Example - use MaybeT to Wrap the IO Monad so that we can perform IO actions
+  - this means our new monad is MaybeT IO
+  - see code in a monadtransformers.hs
+
+-- need to revise what the lift operation does and the . operator
+
+
+--quite a few questions to answer in the monadtransformers.hs file
+--stopping at
+
+ADDING MORE LAYERS
+* it would also be good to read up on the Monad laws section as well as it may answer future underling questions.
+
+Since our newly create type is a monad itself, it can be wrapped inside another transformer
+  - pretty much all common monads have transformer types, the same way that MaybeT is a transformer for the Maybe monad
+
+An example of this is using a Reader monad that needs access to the  IO environment
+
+type Env  = (Maybe String, Maybe String, Maybe String)
+
+readUserName :: MaybeT (ReaderT Env IO) String
+readUserName = MaybeT $ do
+  (maybeOldUser, _, _) <- ask
+  case maybeOldUser of
+    Just str -> return str
+    Nothing -> do
+      -- lift allows normal IO functions from inside the ReaderT Env IO
+      input <- lift getLine
+      if length input > 5
+        then return (Just Input)
+        else return Nothing
+
+In the above example we had to use lift to run the  IO function getLine
+  - in a monad transformer the lift function allows you to run functions from the underlying monad.
+
+Using lift in ReaderT Env IO allows IO functions
+
+Using lift within MaybeT (ReaderT Env IO) monad will allow you to call reader function
+
+To understand lifting think of the monad layer as a stack, in the above examples the IO monad is on the bottom of the layer. To use its functionality in a higher layer you need to lift the function up to that level. This can be done multiple times.
+
+eg. calling lift twice from the MaybeT (ReaderT Env IO) funtions will allow you to run IO in the MaybeT environment.
+
+It is inconvenient to have to remember how many times to call lift, to get to the right Monad, as such helper functions are frequently used for this.
+
+--define this triple Monad as a type as layers can get several layers deep
+type TripleMonad a  = MaybeT (ReaderT Env IO) a
+
+performReader :: ReaderT Env IO a - > TripleMonad a
+performReader = lift
+
+performIO :: IO a -> TripleMonad a
+performIO = lift . lift
+
+-- this is interesting, as the return Value is a triple Monad, which outlines its inclusion in the "stack" but not at a particular level
+-- also, just remember that it is not a monad!
+
+
+
+
+TYPECLASSES
+
+There are some typeclasses that allow you to make assumptions about the monad stack below. For Instance, you don't often care what the stack is but you just need IO to exist somewhere in the stack
+
+  This is the purpose of the MonadIO typeclass
+
+class (Monad m) => MonadIO m where
+  liftIO :: IO a -> m a
+
+we can use this behaviour to get a function to print even when we don't know its exact monad:
+
+debugFunc :: (MonadIO m) => String -> m a
+debugFunc input = do
+  liftIO $ print "Interpreting Input: " ++ input
+...
+
+note that you cannot, in general, wrap another Monad with the IO monad using a transformer!
+  - you can make the other monadic value return the type of an IO action
+
+
+func :: IO (Maybe String)
+-- this makes sense
+
+func2 :: IO_T (ReaderT Env (Maybe)) String
+-- this does not exist
+
+SUMMARY
+
+- we are close to writing complex code however to truly master monads we need to know how to write our own.
+
+the construction of monads is detailed in Monad laws (next chapter)
+  -- each of the structures that we have covered in this series has a series of laws associated with it
+  - for your own instances of the classes to make sense they have to follow the laws!
+
+
+  Knowledge Gaps
+    - need a quick revise on do notation and the Monad Laws

@@ -1,0 +1,15 @@
+TDD and BASIC LIBRARIES
+Haskell has a simple way to implement unit tests due to the type classes and monads.
+
+Installed HUnit and HSpec by running cabal commands
+
+cabal install HUnit
+cabal install hspec
+
+
+-- Notes
+- I am feeling a bit lost with progress atm
+- need to redo tutorials on Monads and applicatives
+- or develop some software to test the functionality
+- perhaps I should implment the MONOPOLY game, or a reduced LUDO version.
+    -- think of a reduced set of rules that uses all the monad functionality.

@@ -124,6 +124,9 @@ funcMaybe (Just f) val = f <$> val
 --pure (4 *) <*> (Just 5)
 -- >> Just 20
 
+-- in the above example of f, we can apply sequential application to unwrap the values applied to a partial function
+-- f <*> (Just 4)
+-- => Just 16
 -- applicatives can be applied on lists
 --instance Applicative [] where
 --  pure a = [a]

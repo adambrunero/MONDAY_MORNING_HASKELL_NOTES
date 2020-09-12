@@ -1,0 +1,42 @@
+`The State Monad
+
+This section looks at how Monads can be used to record and modify system state.
+ - monads are a way to have a global variable that is recorded in some type of type signature
+
+The State Monad
+ - the state monad wraps computations in the context of reading and modifying a global state object
+this context chains two operations together in an intuitive way
+  - first, determines state after the first operation
+  - second, it resolves the second operation with the new state.
+
+-- It is parameterised by a single type s, the state type in use.
+    -- just like reader has a single type we read from
+    -- state has a single type that we can both read from and write to
+
+The two functions we used with the state monad are get and put
+    -- get  - retrieves our state value (like ask in reader monad)
+    -- put  - where we pass an updated state value (like tell in the writer monad)
+
+There will be a final return type of any state.
+-- using the monopoly example, the function types will look like this for a return of type a
+
+State GameState a
+
+OUR MONOPOLY FUNCTIONS
+
+-- need to review movePiece
+    -- example use of lookup
+    -- example use of insert
+
+-- need to review do syntax in Monads
+
+STATE, IO AND OTHER LANGUAGES
+- with haskell it is seen as a weakness that you can't have global variables
+- this is not true, as global variables are available but they have to be
+encoded into a type signature
+- the advantage of this is that you have segreagation of functions that modify
+separate parts of your program.
+- this makes the debugging and integration process easier.
+
+
+*activity, create a reduced MONOPOLY game, lets call it LUDO to use the State Monad
